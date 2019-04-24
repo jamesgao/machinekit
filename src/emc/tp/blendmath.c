@@ -470,10 +470,16 @@ int calculateInscribedDiameter(PmCartesian const * const normal,
 }
 
 
-
-int findAccelScale(PmCartesian const * const acc,
-        PmCartesian const * const bounds,
-        PmCartesian * const scale)
+/**
+ * Given an acceleration vector, find a scale factor that will place it within
+ * machine acceleration limits.
+ * @param acc acceleration vector to be tested
+ * @param bounds vector of machine acceleration limits
+ * @param[out] scale best-case scale factor
+ */
+int findAccelScale(Vector6 const * const acc,
+        Vector6 const * const bounds,
+        double * scale)
 {
     if (!acc || !bounds ) {
         return TP_ERR_MISSING_INPUT;
@@ -483,23 +489,19 @@ int findAccelScale(PmCartesian const * const acc,
         return TP_ERR_MISSING_OUTPUT;
     }
 
-    // Find the scale of acceleration vs. machine accel bounds
-    if (bounds->x != 0) {
-    scale->x = rtapi_fabs(acc->x / bounds->x);
-    } else {
-        scale->x = 0;
-    }
-    if (bounds->y != 0) {
-    scale->y = rtapi_fabs(acc->y / bounds->y);
-    } else {
-        scale->y = 0;
+    int i;
+    double m = 0;
+    for (i = 0; i < 6; ++i) {
+        // Crude numerical cutoff to prevent scales being too low and causing division errors
+        double b = bounds->ax[i];
+        double a = rtapi_fabs(acc->ax[i]);
+        if (b > 0.0) {
+            //Have to square b here since the scale is also squared
+            m = rtapi_fmax(m, a / b);
+        }
     }
 
-    if (bounds->z != 0) {
-    scale->z = rtapi_fabs(acc->z / bounds->z);
-    } else {
-        scale->z = 0;
-    }
+    *scale = m;
 
     return TP_ERR_OK;
 }
@@ -548,8 +550,12 @@ int blendGeom3Init(BlendGeom3 * const geom,
     geom->v_max2 = tc->maxvel;
 
     // Get tangent unit vectors to each arc at the intersection point
-    int res_u1 = tcGetEndTangentUnitVector(prev_tc, &geom->u_tan1);
-    int res_u2 = tcGetStartTangentUnitVector(tc, &geom->u_tan2);
+    // Ugly way recycles these functions and throws out UVW components
+    Vector6 u1, u2;
+    int res_u1 = tcGetEndTangentUnitVector(prev_tc, &u1);
+    int res_u2 = tcGetStartTangentUnitVector(tc, &u2);
+    VecToCart(&u1, &geom->u_tan1, NULL);
+    VecToCart(&u2, &geom->u_tan2, NULL);
 
     // Initialize u1 and u2 by assuming they match the tangent direction
     geom->u1 = geom->u_tan1;
@@ -563,7 +569,7 @@ int blendGeom3Init(BlendGeom3 * const geom,
             geom->P.z);
 
     // Find angle between tangent vectors
-    int res_angle = findIntersectionAngle(&geom->u_tan1,
+    int res_angle = findIntersectionAngle3(&geom->u_tan1,
             &geom->u_tan2,
             &geom->theta_tan);
 
@@ -1159,8 +1165,9 @@ int blendComputeParameters(BlendParameters * const param)
 
 /** Check if the previous line segment will be consumed based on the blend arc parameters. */
 int blendCheckConsume(BlendParameters * const param,
-        BlendPoints3 const * const points,
-        TC_STRUCT const * const prev_tc, int gap_cycles)
+        double trim,
+        TC_STRUCT const * const prev_tc,
+        int gap_cycles)
 {
     //Initialize values
     param->consume = 0;
@@ -1174,7 +1181,7 @@ int blendCheckConsume(BlendParameters * const param,
     }
 
     //Check for segment length limits
-    double L_prev = prev_tc->target - points->trim1;
+    double L_prev = prev_tc->target - trim;
     double prev_seg_time = L_prev / param->v_plan;
 
     bool can_consume = tcCanConsume(prev_tc);
@@ -1539,18 +1546,40 @@ int blendArcArcPostProcess(BlendPoints3 * const points, BlendPoints3 const * con
 
 /**
  * Setup the spherical arc struct based on the blend arc data.
+ * @param[out] arc resulting blend arc
+ * @param points start / end / center points computed for the blend
+ * @param geom geometry details computed for the blend
+ * @param param other generalized parameters for the blend
+ * @param uvw fixed UVW position during blend motion.
+ *
+ * This function translates from blend calculations into a form usable for
+ * building a spherical arc. Note that in this function, UVW position is held
+ * constant during the blend.
  */
-int arcFromBlendPoints3(SphericalArc * const arc, BlendPoints3 const * const points,
-        BlendGeom3 const * const geom, BlendParameters const * const param)
+int arcFromBlendPoints3(SphericalArc * const arc,
+        BlendPoints3 const * const points,
+        BlendGeom3 const * const geom,
+        BlendParameters const * const param,
+        PmCartesian const * const uvw)
 {
     // If we consume the previous line, the remaining line length gets added here
-    arc->uTan = geom->u_tan1;
+
+    // Augment 3D tangent vector with zeros and save as 6D tangent vector
+    // Necessary for line arc case
+    PmCartesian zero={0,0,0};
+    CartToVec(&geom->u_tan1, &zero, &arc->uTan);
+
     arc->line_length = param->line_length;
     arc->binormal = geom->binormal;
 
-    // Create the arc from the processed points
-    return arcInitFromPoints(arc, &points->arc_start,
-            &points->arc_end, &points->arc_center);
+    // Augment start, end, and center vectors with fixed UVW position
+    Vector6 start, end, center;
+    CartToVec(&points->arc_start, &zero, &start);
+    CartToVec(&points->arc_end, &zero, &end);
+    CartToVec(&points->arc_center, uvw, &center);
+
+    // Finally, use the augmented vectors to create the 6D arc
+    return arcInitFromPoints(arc, &start, &end, &center);
 }
 
 int blendGeom3Print(BlendGeom3 const * const geom)

@@ -20,6 +20,7 @@
 #include "emcpos.h"
 #include "tc_types.h"
 #include "tp_types.h"
+#include "vector6.h"
 
 int tcGetEndpoint(TC_STRUCT const * const tc, EmcPose * const out);
 int tcGetStartpoint(TC_STRUCT const * const tc, EmcPose * const out);
@@ -27,8 +28,9 @@ int tcGetPos(TC_STRUCT const * const tc,  EmcPose * const out);
 int tcGetPosReal(TC_STRUCT const * const tc, int of_endpoint,  EmcPose * const out);
 int tcGetEndAccelUnitVector(TC_STRUCT const * const tc, PmCartesian * const out);
 int tcGetStartAccelUnitVector(TC_STRUCT const * const tc, PmCartesian * const out);
-int tcGetEndTangentUnitVector(TC_STRUCT const * const tc, PmCartesian * const out);
-int tcGetStartTangentUnitVector(TC_STRUCT const * const tc, PmCartesian * const out);
+
+int tcGetEndTangentUnitVector(TC_STRUCT const * const tc, Vector6 * const out);
+int tcGetStartTangentUnitVector(TC_STRUCT const * const tc, Vector6 * const out);
 
 int tcGetIntersectionPoint(TC_STRUCT const * const prev_tc,
         TC_STRUCT const * const tc, PmCartesian * const point);
@@ -38,8 +40,8 @@ int tcCanConsume(TC_STRUCT const * const tc);
 int tcSetTermCond(TC_STRUCT * const tc, int term_cond);
 
 int tcConnectBlendArc(TC_STRUCT * const prev_tc, TC_STRUCT * const tc,
-        PmCartesian const * const circ_start,
-        PmCartesian const * const circ_end);
+        Vector6 const * const circ_start,
+        Vector6 const * const circ_end);
 
 int tcIsBlending(TC_STRUCT * const tc);
 

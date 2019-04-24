@@ -15,6 +15,7 @@
 
 #include "posemath.h"
 #include "tc_types.h"
+#include "vector6.h"
 
 #define BLEND_ACC_RATIO_TANGENTIAL 0.5
 #define BLEND_ACC_RATIO_NORMAL (pmSqrt(1.0 - pmSq(BLEND_ACC_RATIO_TANGENTIAL)))
@@ -136,7 +137,7 @@ int sat_inplace(double * const x, double max);
 
 int checkTangentAngle(PmCircle const * const circ, SphericalArc const * const arc, BlendGeom3 const * const geom, BlendParameters const * const param, double cycle_time, int at_end);
 
-int findIntersectionAngle(PmCartesian const * const u1,
+int findIntersectionAngle3(PmCartesian const * const u1,
         PmCartesian const * const u2, double * const theta);
 
 double pmCartMin(PmCartesian const * const in);
@@ -144,9 +145,9 @@ double pmCartMin(PmCartesian const * const in);
 int calculateInscribedDiameter(PmCartesian const * const normal,
         PmCartesian const * const bounds, double * const diameter);
 
-int findAccelScale(PmCartesian const * const acc,
-        PmCartesian const * const bounds,
-        PmCartesian * const scale);
+int findAccelScale(Vector6 const * const acc,
+        Vector6 const * const bounds,
+        double * m_out);
 
 int pmCartCartParallel(PmCartesian const * const v1,
         PmCartesian const * const v2, double tol);
@@ -159,8 +160,9 @@ int blendCalculateNormals3(BlendGeom3 * const geom);
 int blendComputeParameters(BlendParameters * const param);
 
 int blendCheckConsume(BlendParameters * const param,
-        BlendPoints3 const * const points,
-        TC_STRUCT const * const prev_tc, int gap_cycles);
+        double trim,
+        TC_STRUCT const * const prev_tc,
+        int gap_cycles);
 
 int blendFindPoints3(BlendPoints3 * const points, BlendGeom3 const * const geom,
         BlendParameters const * const param);
@@ -217,8 +219,11 @@ int blendArcLinePostProcess(BlendPoints3 * const points, BlendPoints3 const * co
         BlendParameters * const param, BlendGeom3 const * const geom,
         PmCircle const * const circ1, PmCartLine const * const line2);
 
-int arcFromBlendPoints3(SphericalArc * const arc, BlendPoints3 const * const points,
-        BlendGeom3 const * const geom, BlendParameters const * const param);
+int arcFromBlendPoints3(SphericalArc * const arc,
+        BlendPoints3 const * const points,
+        BlendGeom3 const * const geom,
+        BlendParameters const * const param,
+        PmCartesian const * const uvw);
 
 //Not implemented yet
 int blendGeom3Print(BlendGeom3 const * const geom);

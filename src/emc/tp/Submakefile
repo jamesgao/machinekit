@@ -17,6 +17,7 @@ INCLUDES += $(TP_DIR)
 # 	tp.o 		\
 # 	tpmain.o 	\
 # 	blendmath.o 	\
+#	blendmath6.o	\
 # 	spherical_arc.o 	\
 # 	) 		\
 # 	emc/nml_intf/emcpose.o \

@@ -18,7 +18,7 @@ int findIntersectionAngle6(Vector6 const * const u1,
         sat_inplace(&dot,1.0);
     }
 
-    *theta = acos(-dot)/2.0;
+    *theta = rtapi_acos(-dot)/2.0;
     return TP_ERR_OK;
 }
 
@@ -35,7 +35,7 @@ int blendFindPoints6(BlendPoints6 * const points, BlendGeom6 const * const geom,
         BlendParameters const * const param)
 {
     // Find center of blend arc along normal vector
-    double center_dist = param->R_plan / sin(param->theta);
+    double center_dist = param->R_plan / rtapi_sin(param->theta);
     tp_debug_print("center_dist = %f\n", center_dist);
 
     VecScalMult(&geom->normal, center_dist, &points->arc_center);
@@ -152,13 +152,13 @@ int blendParamKinematics6(BlendGeom6 * const geom,
     double phi_effective = rtapi_fmin(param->phi, PM_PI * 0.49);
 
     // Copy over maximum velocities, clipping velocity to place altitude within base
-    double v_max1 = rtapi_fmin(prev_tc->maxvel, tc->maxvel / cos(phi_effective));
-    double v_max2 = rtapi_fmin(tc->maxvel, prev_tc->maxvel / cos(phi_effective));
+    double v_max1 = rtapi_fmin(prev_tc->maxvel, tc->maxvel / rtapi_cos(phi_effective));
+    double v_max2 = rtapi_fmin(tc->maxvel, prev_tc->maxvel / rtapi_cos(phi_effective));
 
     tp_debug_print("v_max1 = %f, v_max2 = %f\n", v_max1, v_max2);
 
     // Get "altitude"
-    double v_area = v_max1 * v_max2 / 2.0 * sin(param->phi);
+    double v_area = v_max1 * v_max2 / 2.0 * rtapi_sin(param->phi);
     tp_debug_print("phi = %f\n", param->phi);
     tp_debug_print("v_area = %f\n", v_area);
 

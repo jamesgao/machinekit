@@ -490,6 +490,7 @@ HEADERS := \
     emc/tp/tp_types.h \
     emc/tp/spherical_arc.h \
     emc/tp/blendmath.h \
+    emc/tp/blendmath6.h \
     emc/tp/tp_shared.h \
     emc/tp/tp_private.h \
     emc/motion/emcmotcfg.h \
@@ -576,6 +577,7 @@ HEADERS := \
     libnml/posemath/gotypes.h \
     libnml/posemath/gomath.h \
     libnml/posemath/sincos.h \
+    libnml/posemath/vector6.h \
     libnml/rcs/rcs.hh \
     libnml/rcs/rcs_exit.hh \
     libnml/rcs/rcs_print.hh \
@@ -1564,10 +1566,12 @@ tp-objs := $(addprefix emc/tp/, \
 	tp.o 		\
 	tpmain.o 	\
 	blendmath.o 	\
+	blendmath6.o 	\
 	spherical_arc.o 	\
 	) 		\
 	emc/nml_intf/emcpose.o \
 	libnml/posemath/_posemath.o \
+	libnml/posemath/vector6.o \
 	libnml/posemath/sincos.o $(MATHSTUB)
 
 

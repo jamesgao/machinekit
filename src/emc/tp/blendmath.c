@@ -357,7 +357,7 @@ int pmCircLineCoplanar(PmCircle const * const circ,
  * direction, then the intersection angle is PI/2. This is based on the
  * simple_tp formulation for tolerances.
  */
-int findIntersectionAngle(PmCartesian const * const u1,
+int findIntersectionAngle3(PmCartesian const * const u1,
         PmCartesian const * const u2, double * const theta)
 {
     double dot;

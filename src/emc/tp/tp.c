@@ -1804,8 +1804,10 @@ STATIC int tpSetupTangent(TP_STRUCT const * const tp,
                 res_endtan, res_starttan);
     }
 
-    tp_debug_print("prev tangent vector: %f %f %f\n", prev_tan.x, prev_tan.y, prev_tan.z);
-    tp_debug_print("this tangent vector: %f %f %f\n", this_tan.x, this_tan.y, this_tan.z);
+    tp_debug_print("prev tangent vector:\n");
+    VecPrint(&prev_tan);
+    tp_debug_print("this tangent vector:\n");
+    VecPrint(&this_tan);
 
     double dot = -1.0;
     const double SHARP_CORNER_DEG = 2.0;

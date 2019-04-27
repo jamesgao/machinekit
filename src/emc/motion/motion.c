@@ -1451,13 +1451,10 @@ static int init_shared(tp_shared_t *tps,
     tps->dtg[8] = &status->dtg.w;
 
     // from joints array
-    tps->acc_limit[0] = &joint[0].acc_limit;
-    tps->acc_limit[1] = &joint[1].acc_limit;
-    tps->acc_limit[2] = &joint[2].acc_limit;
-
-    tps->vel_limit[0] = &joint[0].vel_limit;
-    tps->vel_limit[1] = &joint[1].vel_limit;
-    tps->vel_limit[2] = &joint[2].vel_limit;
+    for (int i = 0; i < 9; i ++) {
+        tps->acc_limit[i] = &joint[i].acc_limit;
+        tps->vel_limit[i] = &joint[i].vel_limit;
+    }
 
     // from  emcmot_debug_t
     tps->stepping = &dbg->stepping;

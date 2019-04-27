@@ -32,8 +32,8 @@ typedef struct tp_shared_t {
     hal_float_t *maxFeedScale;
     hal_float_t *net_feed_scale;
 
-    hal_float_t *acc_limit[3];
-    hal_float_t *vel_limit[3];
+    hal_float_t *acc_limit[9];
+    hal_float_t *vel_limit[9];
 
     hal_bit_t  *stepping;
     hal_u32_t  *enables_new;
